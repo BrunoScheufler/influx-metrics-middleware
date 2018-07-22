@@ -18,11 +18,12 @@ This middleware uses a `handleRequest` method similar to an express request hand
 
 ### API
 
-- `init(options: CombinedOptions)`
-	- passes [options](#configuration) to middleware, configures node-influx
+- `handle(options: CombinedOptions)`
+  - passes [options](#configuration) to middleware, configures node-influx
+  - returns actual middleware
 - `handleRequest({ req: express.Request, res: express.Response }, { addToBatch: (point: IPoint | IPoint[]) => void })`
-	- exposes [req](http://expressjs.com/en/4x/api.html#req) & [res](http://expressjs.com/en/4x/api.html#res) objects from request
-	- allows for addToBatch to be invoked with a single [point](https://node-influx.github.io/typedef/index.html#static-typedef-IPoint) point or a collection of many
+  - exposes [req](http://expressjs.com/en/4x/api.html#req) & [res](http://expressjs.com/en/4x/api.html#res) objects from request
+  - allows for addToBatch to be invoked with a single [point](https://node-influx.github.io/typedef/index.html#static-typedef-IPoint) point or a collection of many
 
 ### Example
 
@@ -30,56 +31,53 @@ The snippet below is a simple express application with metrics collection for so
 
 ```typescript
 import { createServer } from 'http';
-
 import express from 'express';
-import influxMetrics, { FieldType } from 'influx-metrics-middleware';
+import influxMetrics, { FieldType, CombinedOptions } from 'influx-metrics-middleware';
 
 const app = express();
 const server = createServer(app);
 
-// Initialize middleware
-influxMetrics.init({
-	host: 'localhost',
-	username: 'sample-user',
-	password: 'sample-password',
-	database: 'sample-database',
-	handleRequest: ({ req, res }, { addToBatch }) => {
-		const requestStarted = Date.now();
-		res.on('finish', () => {
-			addToBatch([
-				{
-					measurement: 'request_data',
-					fields: {
-						duration: Date.now() - requestStarted
-					},
-					tags: {
-						ip: req.ip,
-						status: res.statusCode.toString(),
-						path: req.originalUrl
-					}
-				}
-			]);
-		});
-	},
-	batchLimit: 1000,
-	disableBatch: true,
-	throwErrors: true,
-	queueFailedBatch: true,
-	schema: [
-		{
-			measurement: 'request_data',
-			tags: ['ip', 'status', 'path'],
-			fields: {
-				duration: FieldType.INTEGER
-			}
-		}
-	]
-});
+const influxMetricsOptions: CombinedOptions = {
+  host: 'localhost',
+  username: 'sample-user',
+  password: 'sample-password',
+  database: 'sample-database',
+  handleRequest: ({ req, res }, { addToBatch }) => {
+    const start = Date.now();
+    res.on('finish', () => {
+      addToBatch([
+        {
+          measurement: 'request_data',
+          fields: {
+            duration: Date.now() - start
+          },
+          tags: {
+            ip: req.ip,
+            status: res.statusCode.toString(),
+            path: req.originalUrl
+          }
+        }
+      ]);
+    });
+  },
+  batchLimit: 10000,
+  disableBatch: false,
+  throwErrors: true,
+  schema: [
+    {
+      measurement: 'request_data',
+      tags: ['ip', 'status', 'path'],
+      fields: {
+        duration: FieldType.INTEGER
+      }
+    }
+  ]
+};
 
-app.use(influxMetrics.handle());
+app.use(influxMetrics.handle(influxMetricsOptions));
 
 app.get('/', (req, res) => {
-	res.sendStatus(200);
+  res.sendStatus(200);
 });
 
 server.listen(3000);

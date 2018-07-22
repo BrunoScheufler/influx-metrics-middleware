@@ -19,7 +19,7 @@ interface IMiddlewareOptions {
 	queueFailedBatch?: boolean;
 }
 
-type CombinedOptions = IMiddlewareOptions & ISingleHostConfig;
+export type CombinedOptions = IMiddlewareOptions & ISingleHostConfig;
 
 class InfluxMetricsMiddleware {
 	private influxDB: InfluxDB | null = null;
@@ -27,7 +27,7 @@ class InfluxMetricsMiddleware {
 
 	private batch: IPoint[] = [];
 
-	public init(options: CombinedOptions) {
+	public handle(options: CombinedOptions): RequestHandler {
 		// Create node-influx instance
 		this.influxDB = new InfluxDB(options);
 
@@ -50,12 +50,6 @@ class InfluxMetricsMiddleware {
 
 		// Store options
 		this.options = options;
-	}
-
-	public handle(): RequestHandler {
-		if (this.influxDB === null) {
-			throw new Error('Please initialize the metrics middleware before using it');
-		}
 
 		const handlers: IMiddlewareRequestHandlers = { addToBatch: this.addToBatch };
 
