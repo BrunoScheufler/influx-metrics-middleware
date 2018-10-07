@@ -14,7 +14,7 @@ yarn add influx-metrics-middleware
 
 ## Usage
 
-This middleware uses a `handleRequest` method similar to an express request handler to handle each request express passes to it. You can utilize everything you love from express and simply call the `addToBatch` method to add records to the batch.
+This middleware uses a `handleRequest` method similar to an express request handler to handle each request express passes to it. You can utilize everything you love from express and simply call the `addToBatch` method to add records to a batch which will be sent to the given InfluxDB instance once a certain threshold is reached.
 
 ### API
 
@@ -27,7 +27,7 @@ This middleware uses a `handleRequest` method similar to an express request hand
 
 ### Example
 
-The snippet below is a simple express application with metrics collection for some request details.
+The snippet below is a simple express application with metrics collection for basic request details.
 
 ```typescript
 import { createServer } from 'http';
@@ -39,12 +39,14 @@ const server = createServer(app);
 
 const influxMetricsOptions: CombinedOptions = {
   host: 'localhost',
-  username: 'sample-user',
+  username: 'sample-influx-user',
   password: 'sample-password',
   database: 'sample-database',
   handleRequest: ({ req, res }, { addToBatch }) => {
+    // this method will be called on every request
     const start = Date.now();
     res.on('finish', () => {
+      // once the request is done, push the related data to the InfluxDB batch
       addToBatch([
         {
           measurement: 'request_data',
@@ -74,6 +76,7 @@ const influxMetricsOptions: CombinedOptions = {
   ]
 };
 
+// initialize the middleware
 app.use(influxMetrics.handle(influxMetricsOptions));
 
 app.get('/', (req, res) => {
