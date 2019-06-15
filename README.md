@@ -1,5 +1,7 @@
 # influx-metrics-middleware
 
+[![CircleCI](https://circleci.com/gh/BrunoScheufler/influx-metrics-middleware.svg?style=svg)](https://circleci.com/gh/BrunoScheufler/influx-metrics-middleware)
+
 > A customizable, unopinionated express middleware for InfluxDB metrics built on top of [node-influx](https://github.com/node-influx/node-influx)
 
 ## Installation
