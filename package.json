@@ -41,7 +41,7 @@
     "@types/express": "4.17.2",
     "@types/node": "12.12.5",
     "prettier": "1.18.2",
-    "semantic-release": "15.13.29",
+    "semantic-release": "15.13.30",
     "tslint": "5.20.0",
     "typescript": "3.6.4"
   },
