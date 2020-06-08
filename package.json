@@ -39,7 +39,7 @@
   "homepage": "https://github.com/BrunoScheufler/influx-metrics-middleware#readme",
   "devDependencies": {
     "@types/express": "4.17.6",
-    "@types/node": "12.12.44",
+    "@types/node": "12.12.45",
     "prettier": "1.19.1",
     "semantic-release": "16.0.4",
     "tslint": "5.20.1",
