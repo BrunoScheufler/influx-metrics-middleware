@@ -46,6 +46,6 @@
     "typescript": "3.9.7"
   },
   "dependencies": {
-    "influx": "5.5.2"
+    "influx": "5.5.3"
   }
 }
